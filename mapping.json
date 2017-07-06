@@ -1,0 +1,1 @@
+{"volumemappings": [{"hostdestination": "/home/sashayakovtseva/goworkspace/src/test.com/sasha/ImageServer/images/", "containerdestination": "/go/bin/images/", "accessmode": "rwc"}]}
