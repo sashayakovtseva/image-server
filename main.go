@@ -17,19 +17,19 @@ import (
 )
 
 var (
-	ImageTemplate string = `<!DOCTYPE html>
+	imageTemplate = `<!DOCTYPE html>
 <html lang="en"><head></head>
 <body>
 <img src="data:image/jpg;base64,{{.Image}}">
 </body>`
 
-	CatsTemplate string = `<!DOCTYPE html>
+	catsTemplate = `<!DOCTYPE html>
 <html lang="en"><head></head>
 <body>
 {{range .}}<img src="data:image/jpg;base64,{{.}}">{{end}}
 </body>`
 
-	CatsGoodTemplate string = `<!DOCTYPE html>
+	catsGoodTemplate = `<!DOCTYPE html>
 <html lang="en"><head></head>
 <body>
 {{range .}}<img src="{{.}}">{{end}}
@@ -37,8 +37,8 @@ var (
 )
 
 const (
-	MAX_IMG      = math.MaxInt32
-	IMG_BASE_DIR = "./images/"
+	maxImg     = math.MaxInt32
+	imgBaseDir = "./images/"
 )
 
 func main() {
@@ -71,23 +71,23 @@ func redHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func catsGoodHandler(w http.ResponseWriter, r *http.Request) {
-	files, err := ioutil.ReadDir(IMG_BASE_DIR)
+	files, err := ioutil.ReadDir(imgBaseDir)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	n := MAX_IMG
-	if len(files) < MAX_IMG {
+	n := maxImg
+	if len(files) < maxImg {
 		n = len(files)
 	}
 
 	imgs := make([]string, n)
 	for i := 0; i < n; i++ {
-		imgs[i] = IMG_BASE_DIR[1:] + files[i].Name()
+		imgs[i] = imgBaseDir[1:] + files[i].Name()
 	}
 
-	if tmpl, err := template.New("catsGood").Parse(CatsGoodTemplate); err != nil {
+	if tmpl, err := template.New("catsGood").Parse(catsGoodTemplate); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	} else {
 		if err = tmpl.Execute(w, imgs); err != nil {
@@ -97,19 +97,19 @@ func catsGoodHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func catsHandler(w http.ResponseWriter, r *http.Request) {
-	files, err := ioutil.ReadDir(IMG_BASE_DIR)
+	files, err := ioutil.ReadDir(imgBaseDir)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	n := MAX_IMG
-	if len(files) < MAX_IMG {
+	n := maxImg
+	if len(files) < maxImg {
 		n = len(files)
 	}
 	imgs := make([]image.Image, n)
 	for i := 0; i < n; i++ {
-		f, err := os.Open(IMG_BASE_DIR + files[i].Name())
+		f, err := os.Open(imgBaseDir + files[i].Name())
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
@@ -125,7 +125,7 @@ func catsHandler(w http.ResponseWriter, r *http.Request) {
 	writeImagesWithTemplate(w, imgs)
 }
 
-// Writeimagewithtemplate encodes an image 'img' in jpeg format and writes it into ResponseWriter using a template.
+// writeImageWithTemplate encodes an image 'img' in jpeg format and writes it into ResponseWriter using a template.
 func writeImageWithTemplate(w http.ResponseWriter, img *image.Image) {
 	buffer := new(bytes.Buffer)
 	if err := jpeg.Encode(buffer, *img, nil); err != nil {
@@ -133,7 +133,7 @@ func writeImageWithTemplate(w http.ResponseWriter, img *image.Image) {
 	}
 
 	str := base64.StdEncoding.EncodeToString(buffer.Bytes())
-	if tmpl, err := template.New("image").Parse(ImageTemplate); err != nil {
+	if tmpl, err := template.New("image").Parse(imageTemplate); err != nil {
 		log.Println("unable to parse image template.")
 	} else {
 		data := map[string]interface{}{"Image": str}
@@ -153,7 +153,7 @@ func writeImagesWithTemplate(w http.ResponseWriter, imgs []image.Image) {
 		}
 		b64imgs[i] = base64.StdEncoding.EncodeToString(buffer.Bytes())
 	}
-	if tmpl, err := template.New("cats").Parse(CatsTemplate); err != nil {
+	if tmpl, err := template.New("cats").Parse(catsTemplate); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	} else {
 		if err = tmpl.Execute(w, b64imgs); err != nil {
